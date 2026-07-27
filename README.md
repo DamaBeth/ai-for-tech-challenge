@@ -1,10 +1,10 @@
-# Senkats
+# Zorawaru
 
-Challenge Alura - Zorawaru, Agente conversacional para la plataforma educativa Senkats.
+Challenge Alura - Zorawaru, Agente conversacional para la plataforma educativa ficticia: Senkats.
 
 ## 🧩 Descripción del proyecto
 
-Zorawaru es un asistente virtual basado en inteligencia artificial que permite consultar información de la plataforma educativa ficticia Senkats mediante conversaciones naturales. El proyecto implementa un flujo RAG (Retrieval-Augmented Generation) que recupera documentos relevantes desde Google Drive, los transforma en embeddings y los almacena en Pinecone para responder preguntas con contexto real y actualizado.
+Zorawaru es un asistente virtual basado en inteligencia artificial que permite consultar información de la plataforma educativa ficticia Senkats mediante lenguaje natural. El proyecto implementa un flujo RAG (Retrieval-Augmented Generation) que recupera documentos relevantes desde Google Drive, los transforma en embeddings y los almacena en Pinecone para responder preguntas con contexto real y actualizado.
 
 La aplicación cuenta con una interfaz web construida con Streamlit, donde el usuario puede hacer preguntas sobre la plataforma y recibir respuestas generadas por Google Gemini, además de registrar feedback sobre la calidad de las respuestas.
 

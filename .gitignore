@@ -1,5 +1,5 @@
 .env
 .venv-gemini-v2
+__pycache__
 README_draft.md
 requirements_2.txt
-__pycache__
