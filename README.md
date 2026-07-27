@@ -21,11 +21,11 @@ El flujo del proyecto sigue esta lógica:
 
 ### Archivos principales
 
-- app.py: interfaz de usuario con Streamlit y lógica de chat.
-- zorawaru_agent.py: orquestación del flujo RAG y generación de respuestas.
-- embeddings.py: sincronización, indexación y actualización de documentos en Pinecone.
-- config.py: configuración de modelos y variables de entorno.
-- get_google_credentials.py: autenticación con Google Drive mediante cuenta de servicio.
+- **app.py**: interfaz de usuario con Streamlit y lógica de chat.
+- **zorawaru_agent.py**: orquestación del flujo RAG y generación de respuestas.
+- **embeddings.py**: sincronización, indexación y actualización de documentos en Pinecone.
+- **config.py**: configuración de modelos y variables de entorno.
+- **get_google_credentials.py**: autenticación con Google Drive mediante cuenta de servicio.
 
 ## 🛠️ Tecnologías utilizadas
 
