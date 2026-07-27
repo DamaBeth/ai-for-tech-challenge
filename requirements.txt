@@ -17,7 +17,10 @@ google-auth-httplib2==0.2.0
 google-auth-oauthlib==1.2.1
 google-ai-generativelanguage==0.6.15
 
+pinecone==7.3.0
 pinecone-client==5.0.0
+pinecone-plugin-assistant==1.8.0
+pinecone-plugin-interface==0.0.7
 google-api-python-client==2.198.0
 
 certifi==2026.7.22
