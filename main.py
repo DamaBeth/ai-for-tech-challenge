@@ -1,7 +1,8 @@
 from config import embeddings_model, llm, INDEX_NAME   
 from embeddings import PineconeService
 from langchain_pinecone import PineconeVectorStore
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.messages import HumanMessage, AIMessage
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
 from langchain_pinecone import PineconeVectorStore
@@ -26,87 +27,113 @@ def format_documents(docs):
         
     return "\n\n".join(formatted_chunks)
 
-def preguntar_al_agente(pregunta: str) -> str:
-    """Consulta la base de datos vectorial remota de Pinecone y responde utilizando el LLM, Gemini."""
+
+def preguntar_al_agente(pregunta: str, chat_history: list) -> str:
+    """Consulta la base de datos vectorial y responde manteniendo el historial."""
     
-    # 1. Conectarse al índice existente en Pinecone
+    # 1. Conectarse al índice en Pinecone
     vectorstore = PineconeVectorStore(
-        index_name = INDEX_NAME,
-        embedding = embeddings_model
+        index_name=INDEX_NAME,
+        embedding=embeddings_model
     )
     
-    # 2. Configurar el recuperador (top 4 fragmentos)
+    # 2. Configurar el recuperador
     retriever = vectorstore.as_retriever(search_kwargs={"k": 4})
 
-    # 3. Definir la plantilla del prompt del sistema
-    system_prompt = (
-        """
-            Tu nombre es Zorawaru 🦊, un asistente amigable, divertido y profesional experto en la plataforma educativa 'Senkats'. 
+    # 3. Recuperar y formatear los documentos relevantes para la pregunta actual
+    docs = retriever.invoke(pregunta)
+    contexto_formateado = format_documents(docs)
 
-            ### OBJETIVO
-            Responder las dudas de los usuarios utilizando ÚNICAMENTE la información del contexto proporcionado.
+    # 4. Definir la plantilla del prompt del sistema con soporte para historial
+    system_prompt = f"""
+    Tu nombre es Zorawaru 🦊, un asistente amigable, divertido y profesional experto en la plataforma educativa 'Senkats'. 
 
-            ### REGLAS DE RESPUESTA
-            1. Mantén un tono amable, jovial y profesional. Puedes usar emojis adecuados al contexto 🚀.
-            2. Básate estrictamente en el contexto. Si la respuesta no está en el contexto o no estás seguro, indica abiertamente que no encuentras la información. No inventes datos.
-            3. Lee atentamente la cabecera o metadata de los fragmentos en el contexto para identificar los datos del documento origen.
-            4. DEDUPLICACIÓN Y AGRUPACIÓN DE FUENTES:
-                - Si la información proviene del documento en general o abarca toda una categoría/capítulo, indica el nombre del Capítulo o Categoría.
-                - Si abarca múltiples subsecciones dentro del mismo fragmento (ej. 3.1 y 3.2), lista los apartados correspondientes (ej. "Apartado: 3.1 y 3.2" o "Apartado: Completo / Varios").
-                - Solo usa "No especificado en el fragmento" si de verdad el fragmento no contiene ningún encabezado, número de artículo o subsección visible.
+    ### OBJETIVO
+    Responder las dudas de los usuarios utilizando ÚNICAMENTE la información del contexto proporcionado y recordando la conversación previa.
 
-            ### ESTRUCTURA DE SALIDA
-            Responde a la pregunta del usuario y finaliza OBLIGATORIAMENTE con el bloque de "Fuentes consultadas". 
+    ### REGLAS DE RESPUESTA
+    1. Mantén un tono amable, jovial y profesional. Puedes usar emojis adecuados al contexto 🚀.
+    2. Saluda de manera eufórica ÚNICAMENTE en el primer mensaje de la conversación. En los mensajes posteriores, responde directamente a la pregunta sin volver a saludar de forma repetitiva.
+    3. Básate estrictamente en el contexto. Si la respuesta no está en el contexto o no estás seguro, indica abiertamente que no encuentras la información. No inventes datos.
+    4. Lee atentamente la cabecera o metadata de los fragmentos en el contexto para identificar los datos del documento origen.
+    5. DEDUPLICACIÓN Y AGRUPACIÓN DE FUENTES:
+       - Si la información proviene del documento en general o abarca toda una categoría/capítulo, indica el nombre del Capítulo o Categoría.
+       - Si abarca múltiples subsecciones dentro del mismo fragmento (ej. 3.1 y 3.2), lista los apartados correspondientes (ej. "Apartado: 3.1 y 3.2" o "Apartado: Completo / Varios").
+       - Solo usa "No especificado en el fragmento" si de verdad el fragmento no contiene ningún encabezado, número de artículo o subsección visible.
 
-            [Tu respuesta detallada y clara aquí]
+    ### ESTRUCTURA DE SALIDA
+    Responde a la pregunta del usuario y finaliza OBLIGATORIAMENTE con el bloque de "Fuentes consultadas". 
 
-            ---
-            **Fuentes consultadas:**
-            Fuente #<índice>
-            - **Categoría/Sección:** <Categoría, capítulo o sección correspondiente> | **Apartado:** <Subsección(es), número(s) de apartado (ej. 3.1 y 3.2), o "Sección completa">
-            - **Documento:** <Nombre oficial del documento o código>
-            - **Estatus:** <Vigente / Inactivo / No especificado en el fragmento>
-            - **Última actualización:** <Fecha de última actualización o No especificada en el fragmento>
-            \n\n
+    [Tu respuesta detallada y clara aquí]
 
-            (Nota: Si la respuesta proviene de múltiples fragmentos o archivos, enumera cada fuente en el formato anterior).
+    ---
+    **Fuentes consultadas:**
+    Fuente #<índice>
+    - **Categoría/Sección:** <Categoría, capítulo o sección correspondiente> | **Apartado:** <Subsección(es), número(s) de apartado (ej. 3.1 y 3.2), o "Sección completa">
+    - **Documento:** <Nombre oficial del documento o código>
+    - **Estatus:** <Vigente / Inactivo / No especificado en el fragmento>
+    - **Última actualización:** <Fecha de última actualización o No especificada en el fragmento>
+    \n\n
 
-            ### CONTEXTO PROPORCIONADO:
-            {context}
-        """
-    )
-    
+    ### CONTEXTO PROPORCIONADO:
+    {contexto_formateado}
+    """
+
     prompt = ChatPromptTemplate.from_messages([
         ("system", system_prompt),
+        MessagesPlaceholder(variable_name="chat_history"),
         ("user", "{question}"),
     ])
 
-    # 4. Cadena RAG moderna usando LCEL
-    rag_chain = (
-        {
-            "context": retriever | format_documents,
-            "question": RunnablePassthrough()
-        }
-        | prompt
-        | llm
-        | StrOutputParser()
-    )
+    # 5. Cadena RAG
+    rag_chain = prompt | llm | StrOutputParser()
 
-    # 5. Ejecutar la consulta (retorna el string de la respuesta directamente)
-    respuesta = rag_chain.invoke(pregunta)
+    # 6. Ejecutar pasando la pregunta y el historial
+    respuesta = rag_chain.invoke({
+        "question": pregunta,
+        "chat_history": chat_history
+    })
+
     return respuesta
 
 
 if __name__ == "__main__":
-    # PASO A: Cargar, o revisar si es necesario actualizar los vectores en la nube de Pinecone
+    # PASO A: Sincronización previa en Pinecone
     sync_service = PineconeService()
     sync_service.sync()
 
-    # PASO B: Preguntar al agente
-    # respuesta = preguntar_al_agente("¿Qué es la Pawademia?")
-    # respuesta = preguntar_al_agente("¿La plataforma tiene un curso sobre Inteligencia Artificial?")
-    # respuesta = preguntar_al_agente("¿Quién es el fundador de la plataforma?")
+    print("\n" + "="*50)
+    print("🦊 ¡Zorawaru está listo para responder tus dudas de Senkats!")
+    print("Escribe 'salir', 'exit' o 'q' para terminar la conversación.")
+    print("="*50 + "\n")
 
-    respuesta = preguntar_al_agente("¿Cómo puedo hablar al servicio al cliente?")
+    # Lista para almacenar el historial de la sesión
+    chat_history = []
 
-    print(f"\n🤖Respuesta del agente:\n{respuesta}")
+    # PASO B: Bucle interactivo de conversación
+    while True:
+        try:
+            # Capturar la entrada del usuario en consola
+            pregunta_usuario = input("\n👤 Tú: ").strip()
+
+            # Verificar si el usuario quiere salir
+            if pregunta_usuario.lower() in ["salir", "exit", "q", "cancelar"]:
+                print("\n🦊 Zorawaru: ¡Hasta luego! Espero haberte ayudado mucho. ¡Nos vemos en Senkats! 🚀\n")
+                break
+
+            # Ignorar entradas vacías
+            if not pregunta_usuario:
+                continue
+
+            # Consultar al agente pasando la pregunta y el historial actual
+            respuesta = preguntar_al_agente(pregunta_usuario, chat_history)
+
+            print(f"\n🤖 Zorawaru:\n{respuesta}")
+
+            # Guardar la interacción en el historial para la siguiente iteración
+            chat_history.append(HumanMessage(content=pregunta_usuario))
+            chat_history.append(AIMessage(content=respuesta))
+
+        except (KeyboardInterrupt, EOFError):
+            print("\n\n🦊 Zorawaru: ¡Sesión finalizada! Nos vemos pronto. 🦊")
+            break
