@@ -7,7 +7,8 @@ from langchain_google_community import GoogleDriveLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 # Integración con Pinecone para Almacenamiento de vectores (embeddings)
 from pinecone import Pinecone
-from langchain_pinecone import PineconeVectorStore
+# from langchain_pinecone import PineconeVectorStore
+from langchain_pinecone.vectorstores import PineconeVectorStore
 
 from config import embeddings_model, PINECONE_API_KEY, INDEX_NAME, FOLDER_ID
 from get_google_credentials import get_Google_Drive_credentials
