@@ -1,6 +1,10 @@
 # Zorawaru
 
-Challenge Alura - Zorawaru, Agente conversacional para la plataforma educativa ficticia: Senkats.
+**ONE | AI FOR TECH - Challenge Alura**
+
+**Zorawaru, Agente conversacional para la plataforma educativa ficticia: Senkats.**
+
+![Zorawaru](assets/zorawaru_2.png)
 
 ## 🧩 Descripción del proyecto
 
