@@ -1,0 +1,6 @@
+.env
+.venv-gemini-v2
+README_draft.md
+requirements_2.txt
+__pycache__/
+*.py[cod]
