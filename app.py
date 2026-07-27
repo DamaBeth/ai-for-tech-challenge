@@ -1,7 +1,7 @@
 import sqlite3
 import streamlit as st
 from embeddings import PineconeService
-from zorawaru_agent import ask_agent  # Importa tu función del agente
+from zorawaru_agent import ask_agent
 from langchain_core.messages import HumanMessage, AIMessage
 
 # -------------------------------------------------------------------
@@ -46,13 +46,11 @@ def save_feedback(pregunta: str, respuesta: str, tipo: str):
     conn.close()
 
 
-# Llamamos a las inicializaciones antes de construir la interfaz
-init_data_base()    # Sincroniza Pinecone (cacheado)
-init_sqlite_db()   # Asegura que exista feedback.db
+# Inicializaciones antes de construir la interfaz
+init_data_base()
+init_sqlite_db()
 
-# -------------------------------------------------------------------
-# 2. CONFIGURACIÓN DE LA INTERFAZ Y ESTADO DE SESIÓN
-# -------------------------------------------------------------------
+# Establecer saludo
 st.set_page_config(page_title="Zorawaru - Senkats", page_icon="🦊")
 st.title("🦊 Zorawaru - Asistente de Senkats")
 
@@ -70,9 +68,7 @@ if "chat_history" not in st.session_state:
 if "feedbacks_registrados" not in st.session_state:
     st.session_state.feedbacks_registrados = set()
 
-# -------------------------------------------------------------------
-# 3. INTERFAZ DE CHAT Y LÓGICA DE MENSAJES
-# -------------------------------------------------------------------
+# Interfaz y mensajería
 # Renderizar el historial de conversación
 for idx, msg in enumerate(st.session_state.chat_history):
     role = "user" if isinstance(msg, HumanMessage) else "assistant"
@@ -80,7 +76,7 @@ for idx, msg in enumerate(st.session_state.chat_history):
     with st.chat_message(role):
         st.markdown(msg.content, unsafe_allow_html=True)
         
-        # Mostrar botones de pulgares ÚNICAMENTE en las respuestas del asistente (excepto el saludo inicial)
+        # Mostrar botones de pulgares en las respuestas del asistente (excepto el saludo inicial)
         if isinstance(msg, AIMessage) and idx > 0:
             feedback_key = f"feedback_{idx}"
             
