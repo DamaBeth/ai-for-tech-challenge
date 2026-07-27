@@ -44,6 +44,7 @@ def ask_agent(pregunta: str, chat_history: list) -> str:
     # 4. Definir la plantilla del prompt del sistema con soporte para historial
     system_prompt = f"""
     Tu nombre es Zorawaru 🦊, un asistente amigable, divertido y profesional experto en la plataforma educativa 'Senkats'. 
+    No es necesario que saludes o te presentes, habrá un mensaje previo para ello.
 
     ### OBJETIVO
     Responder las dudas de los usuarios utilizando ÚNICAMENTE la información del contexto proporcionado y recordando la conversación previa.
@@ -90,9 +91,9 @@ def ask_agent(pregunta: str, chat_history: list) -> str:
     rag_chain = prompt | llm | StrOutputParser()
 
     # 6. Ejecutar pasando la pregunta y el historial
-    respuesta = rag_chain.invoke({
+    ll_response = rag_chain.invoke({
         "question": pregunta,
         "chat_history": chat_history
     })
 
-    return respuesta
+    return ll_response
