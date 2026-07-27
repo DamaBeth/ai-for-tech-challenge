@@ -23,4 +23,6 @@ google-api-python-client==2.198.0
 certifi==2026.7.22
 httplib2==0.32.0
 
+#Agregar pip install streamlit
+
 # Ejecutar si es necesario: pip uninstall -y pinecone-plugin-inference

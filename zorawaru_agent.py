@@ -1,25 +1,22 @@
 from config import embeddings_model, llm, INDEX_NAME   
-from embeddings import PineconeService
 from langchain_pinecone import PineconeVectorStore
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_core.messages import HumanMessage, AIMessage
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnablePassthrough
 from langchain_pinecone import PineconeVectorStore
 
 def format_documents(docs):
     formatted_chunks = []
     
     for doc in docs:
-        nombre_doc = doc.metadata.get("file_name") or doc.metadata.get("source", "Documento Senkats")
-        estatus = doc.metadata.get("doc_status", "No especificado")
-        ultima_actualizacion = doc.metadata.get("doc_last_update", "No especificada")
+        document_name = doc.metadata.get("file_name") or doc.metadata.get("source", "Documento Senkats")
+        status = doc.metadata.get("doc_status", "No especificado")
+        last_updated = doc.metadata.get("doc_last_update", "No especificada")
         
         chunk_text = (
             f"--- FUENTE DE INFORMACIÓN ---\n"
-            f"Documento: {nombre_doc}\n"
-            f"Estatus de vigencia: {estatus}\n"
-            f"Última fecha de actualización: {ultima_actualizacion}\n"
+            f"Documento: {document_name}\n"
+            f"Estatus de vigencia: {status}\n"
+            f"Última fecha de actualización: {last_updated}\n"
             f"Contenido:\n{doc.page_content}\n"
             f"--- FIN FUENTE ---"
         )
@@ -28,7 +25,7 @@ def format_documents(docs):
     return "\n\n".join(formatted_chunks)
 
 
-def preguntar_al_agente(pregunta: str, chat_history: list) -> str:
+def ask_agent(pregunta: str, chat_history: list) -> str:
     """Consulta la base de datos vectorial y responde manteniendo el historial."""
     
     # 1. Conectarse al índice en Pinecone
@@ -62,18 +59,22 @@ def preguntar_al_agente(pregunta: str, chat_history: list) -> str:
        - Solo usa "No especificado en el fragmento" si de verdad el fragmento no contiene ningún encabezado, número de artículo o subsección visible.
 
     ### ESTRUCTURA DE SALIDA
-    Responde a la pregunta del usuario y finaliza OBLIGATORIAMENTE con el bloque de "Fuentes consultadas". 
+    Responde a la pregunta del usuario y finaliza OBLIGATORIAMENTE con el bloque de "Fuentes consultadas" en este HTML exacto:
 
-    [Tu respuesta detallada y clara aquí]
+    [Tu respuesta aquí]
 
-    ---
-    **Fuentes consultadas:**
-    Fuente #<índice>
-    - **Categoría/Sección:** <Categoría, capítulo o sección correspondiente> | **Apartado:** <Subsección(es), número(s) de apartado (ej. 3.1 y 3.2), o "Sección completa">
-    - **Documento:** <Nombre oficial del documento o código>
-    - **Estatus:** <Vigente / Inactivo / No especificado en el fragmento>
-    - **Última actualización:** <Fecha de última actualización o No especificada en el fragmento>
-    \n\n
+    <details>
+      <summary>📚 Fuentes consultadas (Clic para desplegar)</summary>
+      <br>
+      <b>Fuente #1</b>
+      <ul>
+        <li><b>Categoría/Sección:</b> ... | <b>Apartado:</b> ...</li>
+        <li><b>Documento:</b> <code>...</code></li>
+        <li><b>Estatus:</b> ...</li>
+        <li><b>Última actualización:</b> ...</li>
+      </ul>
+    </details>
+
 
     ### CONTEXTO PROPORCIONADO:
     {contexto_formateado}
@@ -95,45 +96,3 @@ def preguntar_al_agente(pregunta: str, chat_history: list) -> str:
     })
 
     return respuesta
-
-
-if __name__ == "__main__":
-    # PASO A: Sincronización previa en Pinecone
-    sync_service = PineconeService()
-    sync_service.sync()
-
-    print("\n" + "="*50)
-    print("🦊 ¡Zorawaru está listo para responder tus dudas de Senkats!")
-    print("Escribe 'salir', 'exit' o 'q' para terminar la conversación.")
-    print("="*50 + "\n")
-
-    # Lista para almacenar el historial de la sesión
-    chat_history = []
-
-    # PASO B: Bucle interactivo de conversación
-    while True:
-        try:
-            # Capturar la entrada del usuario en consola
-            pregunta_usuario = input("\n👤 Tú: ").strip()
-
-            # Verificar si el usuario quiere salir
-            if pregunta_usuario.lower() in ["salir", "exit", "q", "cancelar"]:
-                print("\n🦊 Zorawaru: ¡Hasta luego! Espero haberte ayudado mucho. ¡Nos vemos en Senkats! 🚀\n")
-                break
-
-            # Ignorar entradas vacías
-            if not pregunta_usuario:
-                continue
-
-            # Consultar al agente pasando la pregunta y el historial actual
-            respuesta = preguntar_al_agente(pregunta_usuario, chat_history)
-
-            print(f"\n🤖 Zorawaru:\n{respuesta}")
-
-            # Guardar la interacción en el historial para la siguiente iteración
-            chat_history.append(HumanMessage(content=pregunta_usuario))
-            chat_history.append(AIMessage(content=respuesta))
-
-        except (KeyboardInterrupt, EOFError):
-            print("\n\n🦊 Zorawaru: ¡Sesión finalizada! Nos vemos pronto. 🦊")
-            break
