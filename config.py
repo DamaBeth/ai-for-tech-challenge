@@ -2,9 +2,9 @@ import os
 from dotenv import load_dotenv
 
 # Para Windows - Utilizar en desarrollo, comentar en otro caso
-import certifi
-import warnings 
-warnings.filterwarnings("ignore", category = DeprecationWarning)
+# import certifi
+# import warnings 
+# warnings.filterwarnings("ignore", category = DeprecationWarning)
 #-------------------------------------------------------------
 
 # Integración con Google Gemini
@@ -21,8 +21,8 @@ GOOGLE_SERVICE_ACCOUNT_JSON = os.getenv("GOOGLE_SERVICE_ACCOUNT_JSON")
 
 # Para Windows - Utilizar en desarrollo, comentar en otro caso
 # Forzar a httplib2/requests a usar el bundle de certificados de certifi
-os.environ["HTTPLIB2_CA_CERTS"] = certifi.where()
-os.environ["SSL_CERT_FILE"] = certifi.where()
+# os.environ["HTTPLIB2_CA_CERTS"] = certifi.where()
+# os.environ["SSL_CERT_FILE"] = certifi.where()
 #-------------------------------------------------------------
 
 
