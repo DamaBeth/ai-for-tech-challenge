@@ -166,9 +166,16 @@ Puedes encontrar el demo del agente en el siguiente enlace:
 
 - [Zorawaru en Streamlit Cloud](https://zorawaru-ai-for-tech-challenge-h77ldfdodglwl8ovmrby7k.streamlit.app/)
 
-### Registro de Ejecución en la Nube
-![Logs de ejecución en producción]()
-![Interactuando con la interfaz en la nube]()
+### Registro de Ejecución en Streamlit
+#### Logs
+![Logs de ejecución en producción 1](assets/streamlit/logs_1.png)
+
+![Logs de ejecución en producción 2](assets/streamlit/logs_2.png)
+
+#### Interacción con Zorawaru
+![Interactuando con la interfaz en la nube](assets/streamlit/pregunta_2.png)
+
+![Interactuando con la interfaz en la nube](assets/streamlit/fuera_de_contexto.png)
 
 ## 📝 Notas adicionales
 
