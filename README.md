@@ -1,10 +1,12 @@
-# Zorawaru
+<div align="center">
+<h1 style="font-weight: 800; font-size:3em; color: #e85d04; ">Zorawaru</h1>
+<h3 style="font-weight: 700; font-size:2em; color: #faa307; ">ONE | AI FOR TECH - Challenge Alura</h1>
 
-**ONE | AI FOR TECH - Challenge Alura**
+<p style="font-weight: 600; font-size:1.25em; color: #faa307; ">Zorawaru, Agente conversacional para la plataforma educativa ficticia: <b>Senkats</b></p>
 
-**Zorawaru, Agente conversacional para la plataforma educativa ficticia: Senkats.**
+<img src="assets/zorawaru_2.png">
 
-![Zorawaru](assets/zorawaru_2.png)
+</div>
 
 ## 🧩 Descripción del proyecto
 
@@ -127,6 +129,16 @@ streamlit run app.py
 ```
 
 ## 💬 Ejemplos de preguntas y respuestas
+
+### 🎥 Demostración en vídeo
+
+[![Ver demostración](assets/zorawaru_miniatura.png)](https://youtu.be/XLB0jXXzBXY)
+
+### Actualización de vectores
+
+Al comenzar una conversación nueva, se ejecuta la sincronización de archivos para verificar si hubo alguna actualización en la información, en caso de que así haya sido entonces se actualiazarán los vectores en el índice en Pinecone.
+
+![Ejecución desde consola](assets/indexacion.png)
 
 ### Inicio de la conversación
 

@@ -40,6 +40,7 @@ embeddings_model = GoogleGenerativeAIEmbeddings(
 # Modelo del LLM
 llm = ChatGoogleGenerativeAI(
   api_key = GOOGLE_GEMINI_API_KEY,
-  model = "gemini-2.5-flash", 
+  # model = "gemini-2.5-flash", 
+  model = "gemini-3.5-flash", 
   temperature = 0.2
 )
